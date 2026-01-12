@@ -1,0 +1,109 @@
+name: Website Audit Workflow
+
+on:
+  # Run weekly on Sunday at midnight
+  schedule:
+    - cron: '0 0 * * 0'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Website URL to audit'
+        required: true
+        default: 'https://example.com'
+      max_pages:
+        description: 'Maximum pages to crawl'
+        required: false
+        default: '50'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      
+      - name: Run website audit
+        run: |
+          cd backend
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            python3 website-auditor.py "${{ github.event.inputs.url }}" "${{ github.event.inputs.max_pages }}"
+          else
+            # Use environment variable for scheduled runs
+            python3 website-auditor.py "${{ secrets.AUDIT_URL }}" 50
+          fi
+      
+      - name: Upload audit report
+        uses: actions/upload-artifact@v3
+        with:
+          name: audit-report-${{ github.run_number }}
+          path: backend/audit-report-*.json
+          retention-days: 90
+      
+      - name: Create Issue on Critical Findings
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const files = fs.readdirSync('backend').filter(f => f.startsWith('audit-report-'));
+            
+            if (files.length > 0) {
+              const reportPath = `backend/${files[0]}`;
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              if (report.scores.overall < 70) {
+                github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `🔴 Website Audit Alert: Score ${report.scores.overall}/100`,
+                  body: `
+                    ## Audit Report Summary
+                    
+                    **URL:** ${report.url}
+                    **Date:** ${report.timestamp}
+                    
+                    ### Scores
+                    - Overall: ${report.scores.overall}/100
+                    - Performance: ${report.scores.performance}/100
+                    - SEO: ${report.scores.seo}/100
+                    - Accessibility: ${report.scores.accessibility}/100
+                    - Best Practices: ${report.scores.bestPractices}/100
+                    
+                    ### Statistics
+                    - Pages Crawled: ${report.statistics.total_pages}
+                    - Broken Links: ${report.statistics.broken_links}
+                    - Redirects: ${report.statistics.redirects}
+                    
+                    ### Action Required
+                    The website audit score has fallen below 70. Please review the full report in the artifacts.
+                    
+                    [View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+                  `,
+                  labels: ['audit', 'critical']
+                });
+              }
+            }
+
+  notify:
+    needs: audit
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Send notification
+        run: |
+          echo "Audit completed. Check artifacts for detailed report."
+          # Add email notification or Slack webhook here if needed
