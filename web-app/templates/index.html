@@ -58,7 +58,35 @@
         #progressLog::-webkit-scrollbar-thumb:hover {
             background: #475569;
         }
-    </style>
+            .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .tab-btn:hover {
+            background: rgba(51, 65, 85, 0.5);
+            color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+        .tab-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+</style>
 </head>
 <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 min-h-screen">
     <!-- Animated background grid -->
@@ -191,6 +219,38 @@
                 </div>
             </div>
 
+            <!-- Tab Navigation -->
+            <div class="flex items-center justify-center gap-3 mb-8 flex-wrap">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span>Overview</span>
+                </button>
+                <button onclick="switchTab('issues')" id="tab-issues" class="tab-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <span>Issues</span>
+                </button>
+                <button onclick="switchTab('performance')" id="tab-performance" class="tab-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>Performance</span>
+                </button>
+                <button onclick="switchTab('links')" id="tab-links" class="tab-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                    <span>Links</span>
+                </button>
+            </div>
+
+            <!-- Tab Container -->
+            <div id="tabContent">
+                <div id="content-overview" class="tab-content">
+
             <!-- Recommendations Section -->
             <div id="recommendationsSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
                 <h3 class="text-xl font-bold text-slate-100 mb-6">Recommendations</h3>
@@ -199,7 +259,23 @@
                 </div>
             </div>
 
-            <!-- Page Speed Analysis -->
+            
+                        </div>
+                <div id="content-issues" class="tab-content hidden">
+                    <!-- Detailed Issues Section -->
+        <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-slate-100">Detailed Issues</h2>
+                <p class="text-sm text-slate-400">Click to expand for specific fixes</p>
+            </div>
+            <div id="detailedIssuesContainer"></div>
+        </div>
+
+                        </div>
+                
+                <!-- Performance Tab -->
+                <div id="content-performance" class="tab-content hidden">
+                    <!-- Page Speed Analysis -->
             <div id="pageSpeedSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
@@ -232,7 +308,11 @@
                 </div>
             </div>
 
-            <!-- Broken Links Section -->
+                            </div>
+                
+                <!-- Links Tab -->
+                <div id="content-links" class="tab-content hidden">
+                    <!-- Broken Links Section -->
             <div id="brokenLinksSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center">
@@ -483,6 +563,9 @@
 
             // Display broken links
             document.getElementById('brokenLinksCount').textContent = `${report.broken_links.length} broken links found`;
+
+            // Display detailed issues
+            displayDetailedIssues(report);
             const brokenLinksList = document.getElementById('brokenLinksList');
             if (report.broken_links && report.broken_links.length > 0) {
                 brokenLinksList.innerHTML = report.broken_links.map(link => `
@@ -580,6 +663,105 @@
                 startAudit();
             }
         });
+
+
+        function displayDetailedIssues(report) {
+            console.log('=== displayDetailedIssues DEBUG ===');
+            console.log('Report:', report);
+            console.log('Detailed issues count:', report.detailed_issues?.length);
+            console.log('Sample issue:', report.detailed_issues?.[0]);
+            const container = document.getElementById('detailedIssuesContainer');
+            if (!container) {
+                console.error('detailedIssuesContainer not found!');
+                return;
+            }
+            if (!report.detailed_issues || report.detailed_issues.length === 0) {
+                container.innerHTML = '<p class="text-slate-400">No detailed issues available</p>';
+                return;
+            }
+            
+            // Group by category
+            const grouped = {};
+            report.detailed_issues.forEach(issue => {
+                const cat = issue.category || 'Other';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(issue);
+            });
+            
+            console.log('Grouped issues:', grouped);
+            console.log('Categories:', Object.keys(grouped));
+            
+            const html = Object.entries(grouped).map(([category, issues]) => `
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <h3 class="text-lg font-bold text-slate-100">${category}</h3>
+                        <span class="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded-full">${issues.length}</span>
+                    </div>
+                    <div class="space-y-3">${issues.map((issue, idx) => `
+                        <div class="bg-slate-950/50 rounded-lg border border-slate-800 overflow-hidden">
+                            <button onclick="toggleIssue('${category}-${idx}')" class="w-full flex items-center justify-between p-4 hover:bg-slate-800/30 transition text-left">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <span class="w-2 h-2 rounded-full ${issue.type === 'warning' ? 'bg-amber-500' : 'bg-rose-500'}"></span>
+                                        <h4 class="font-semibold text-slate-200">${issue.title}</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500">Page: ${issue.page || issue.url || 'N/A'}</p>
+                                </div>
+                                <svg id="icon-${category}-${idx}" class="w-5 h-5 text-slate-400 transition transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="detail-${category}-${idx}" class="hidden border-t border-slate-800 p-4 bg-slate-900/30">
+                                ${issue.current ? `<div class="mb-3"><p class="text-xs font-semibold text-slate-400 uppercase mb-1">CURRENT:</p><div class="bg-slate-950/50 rounded p-3 border border-slate-800"><code class="text-sm text-rose-400">${escapeHtml(String(issue.current))}</code></div></div>` : ''}
+                                ${issue.fix ? `<div><p class="text-xs font-semibold text-emerald-400 uppercase mb-1">✓ HOW TO FIX:</p><div class="bg-emerald-950/20 rounded p-3 border border-emerald-900/30"><p class="text-sm text-slate-300">${escapeHtml(issue.fix)}</p></div></div>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}</div>
+                </div>
+            `).join('');
+            
+            console.log('Generated HTML length:', html.length);
+            console.log('First 200 chars:', html.substring(0, 200));
+            container.innerHTML = html;
+            console.log('Container updated!');
+        }
+        
+        function toggleIssue(id) {
+            const detail = document.getElementById('detail-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if (detail.classList.contains('hidden')) {
+                detail.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                detail.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function switchTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            const tabContent = document.getElementById('content-' + tabName);
+            const tabBtn = document.getElementById('tab-' + tabName);
+            
+            if (!tabContent) {
+                console.error('Tab content not found:', 'content-' + tabName);
+                return;
+            }
+            
+            tabContent.classList.remove('hidden');
+            tabBtn.classList.add('active');
+            
+            console.log('Tab switched. Hidden?', tabContent.classList.contains('hidden'));
+        }
     </script>
 </body>
 </html>

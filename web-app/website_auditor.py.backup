@@ -15,14 +15,6 @@ from collections import defaultdict
 import warnings
 warnings.filterwarnings('ignore')
 
-# AI-powered fix suggestions
-try:
-    from openai import OpenAI
-    AI_AVAILABLE = True
-except ImportError:
-    AI_AVAILABLE = False
-    print("⚠️ OpenAI not installed. AI suggestions disabled.")
-
 class WebsiteAuditor:
     def __init__(self, base_url, max_pages=50, progress_queue=None):
         self.base_url = base_url.rstrip('/')
@@ -41,8 +33,6 @@ class WebsiteAuditor:
             'warnings': [],
             'info': []
         }
-        self.ai_enabled = False  # Set to True to enable AI suggestions
-        self.openai_api_key = None  # OpenAI API key
     
     def send_progress(self, message, **kwargs):
         """Send progress update to queue if available"""
@@ -97,7 +87,7 @@ class WebsiteAuditor:
         return speed_data
     
     def check_seo_elements(self, soup, url):
-        """Check for SEO-related elements with detailed information"""
+        """Check for SEO-related elements"""
         seo_issues = []
         
         # Check title
@@ -108,9 +98,7 @@ class WebsiteAuditor:
                 'category': 'SEO',
                 'title': 'Missing page title',
                 'url': url,
-                'page': url.replace(self.base_url, '') or '/',
-                'current': 'None',
-                'fix': 'Add a <title> tag with 50-60 characters'
+                'page': url.replace(self.base_url, '') or '/'
             })
         elif len(title.string) > 60:
             seo_issues.append({
@@ -119,8 +107,7 @@ class WebsiteAuditor:
                 'title': 'Page title too long',
                 'url': url,
                 'page': url.replace(self.base_url, '') or '/',
-                'current': f'"{title.string[:60]}..." ({len(title.string)} chars)',
-                'fix': f'Shorten to under 60 characters'
+                'details': f'Title length: {len(title.string)} characters (recommended: <60)'
             })
         
         # Check meta description
@@ -131,9 +118,7 @@ class WebsiteAuditor:
                 'category': 'SEO',
                 'title': 'Missing meta description',
                 'url': url,
-                'page': url.replace(self.base_url, '') or '/',
-                'current': 'None',
-                'fix': 'Add <meta name="description" content="..."> with 150-160 characters'
+                'page': url.replace(self.base_url, '') or '/'
             })
         
         # Check H1 tags
@@ -144,9 +129,7 @@ class WebsiteAuditor:
                 'category': 'SEO',
                 'title': 'No H1 tag found',
                 'url': url,
-                'page': url.replace(self.base_url, '') or '/',
-                'current': 'None',
-                'fix': 'Add one <h1> tag that describes the main topic'
+                'page': url.replace(self.base_url, '') or '/'
             })
         elif len(h1_tags) > 1:
             seo_issues.append({
@@ -155,8 +138,7 @@ class WebsiteAuditor:
                 'title': 'Multiple H1 tags',
                 'url': url,
                 'page': url.replace(self.base_url, '') or '/',
-                'current': f'{len(h1_tags)} H1 tags found',
-                'fix': 'Use only one H1 per page. Change extras to H2 or H3'
+                'details': f'Found {len(h1_tags)} H1 tags'
             })
         
         # Check for canonical tag
@@ -167,9 +149,7 @@ class WebsiteAuditor:
                 'category': 'SEO',
                 'title': 'Missing canonical tag',
                 'url': url,
-                'page': url.replace(self.base_url, '') or '/',
-                'current': 'None',
-                'fix': 'Add <link rel="canonical" href="..."> to prevent duplicate content issues'
+                'page': url.replace(self.base_url, '') or '/'
             })
         
         return seo_issues
@@ -382,11 +362,11 @@ class WebsiteAuditor:
             })
         
         # Group issues by category
-        unique_issue_counts = defaultdict(set)
+        issue_counts = defaultdict(int)
         issue_examples = defaultdict(list)
         for issue_list in self.issues.values():
             for issue in issue_list:
-                unique_issue_counts[issue.get('category', 'Other')].add(issue.get('title', 'unknown'))
+                issue_counts[issue['category']] += 1
                 if len(issue_examples[issue['category']]) < 5:
                     issue_examples[issue['category']].append({
                         'url': issue.get('url', 'N/A'),
@@ -395,48 +375,48 @@ class WebsiteAuditor:
                     })
         
         # SEO recommendations
-        if len(unique_issue_counts['SEO']) > 0:
+        if issue_counts['SEO'] > 0:
             recommendations.append({
                 'priority': 'warning',
                 'category': 'SEO',
-                'title': f'{len(unique_issue_counts["SEO"])} SEO issues found',
+                'title': f'{issue_counts["SEO"]} SEO issues found',
                 'description': 'Missing or suboptimal meta tags and heading structure',
-                'affected_count': len(unique_issue_counts['SEO']),
+                'affected_count': issue_counts['SEO'],
                 'affected_urls': [ex['url'] for ex in issue_examples['SEO']],
                 'recommendation': 'Add unique meta descriptions to all pages, optimize title tags (keep under 60 characters), ensure proper heading hierarchy with single H1 per page'
             })
         
         # Performance recommendations
-        if len(unique_issue_counts['Performance']) > 0:
+        if issue_counts['Performance'] > 0:
             recommendations.append({
                 'priority': 'critical',
                 'category': 'Performance',
-                'title': f'{len(unique_issue_counts["Performance"])} performance issues found',
+                'title': f'{issue_counts["Performance"]} performance issues found',
                 'description': 'Render-blocking resources detected that slow down page load',
-                'affected_count': len(unique_issue_counts['Performance']),
+                'affected_count': issue_counts['Performance'],
                 'affected_urls': [ex['url'] for ex in issue_examples['Performance']],
                 'recommendation': 'Defer non-critical CSS/JS, add async/defer attributes to scripts, consider inlining critical CSS, implement lazy loading for images'
             })
         
         # Security recommendations
-        if len(unique_issue_counts['Security']) > 0:
+        if issue_counts['Security'] > 0:
             recommendations.append({
                 'priority': 'critical',
                 'category': 'Security',
-                'title': f'{len(unique_issue_counts["Security"])} security issues found',
+                'title': f'{issue_counts["Security"]} security issues found',
                 'description': 'Missing security headers leave site vulnerable',
-                'affected_count': len(unique_issue_counts['Security']),
+                'affected_count': issue_counts['Security'],
                 'recommendation': 'Configure server to include security headers: X-Content-Type-Options: nosniff, X-Frame-Options: SAMEORIGIN, Strict-Transport-Security, Content-Security-Policy'
             })
         
         # Accessibility recommendations
-        if len(unique_issue_counts['Accessibility']) > 0:
+        if issue_counts['Accessibility'] > 0:
             recommendations.append({
                 'priority': 'warning',
                 'category': 'Accessibility',
-                'title': f'{len(unique_issue_counts["Accessibility"])} accessibility issues found',
+                'title': f'{issue_counts["Accessibility"]} accessibility issues found',
                 'description': 'Images missing alt text, affecting screen reader users',
-                'affected_count': len(unique_issue_counts['Accessibility']),
+                'affected_count': issue_counts['Accessibility'],
                 'affected_urls': [ex['url'] for ex in issue_examples['Accessibility']],
                 'recommendation': 'Add descriptive alt text to all images, ensure proper color contrast, make interactive elements keyboard accessible'
             })
@@ -444,155 +424,28 @@ class WebsiteAuditor:
         return recommendations
     
     def calculate_score(self):
-        """Calculate scores using Lighthouse-style methodology"""
+        """Calculate overall score based on issues"""
         self.send_progress("Calculating scores...")
+        base_score = 100
         
-        from collections import defaultdict
+        # Deduct points for issues
+        critical_deduction = len([i for lst in self.issues.values() for i in lst if i.get('type') == 'critical']) * 10
+        warning_deduction = len([i for lst in self.issues.values() for i in lst if i.get('type') == 'warning']) * 5
+        info_deduction = len([i for lst in self.issues.values() for i in lst if i.get('type') == 'info']) * 2
         
-        # Count UNIQUE issues per category (not per-page duplicates)
-        unique_issues_by_category = defaultdict(set)
+        # Deduct for broken links
+        broken_deduction = min(len(self.broken_links) * 3, 30)
         
-        for issue_list in self.issues.values():
-            for issue in issue_list:
-                category = issue.get('category', 'Other')
-                issue_key = f"{issue.get('title', 'unknown')}"
-                unique_issues_by_category[category].add(issue_key)
-        
-        # SEO Score (0-100) - Each unique issue = -20 points
-        seo_unique = len(unique_issues_by_category.get('SEO', set()))
-        seo_score = max(0, 100 - (seo_unique * 20))
-        
-        # Performance Score (0-100) - Each unique issue = -25 points
-        perf_unique = len(unique_issues_by_category.get('Performance', set()))
-        performance_score = max(0, 100 - (perf_unique * 25))
-        
-        # Accessibility Score (0-100) - Each unique issue = -20 points
-        access_unique = len(unique_issues_by_category.get('Accessibility', set()))
-        accessibility_score = max(0, 100 - (access_unique * 20))
-        
-        # Best Practices Score (0-100)
-        security_unique = len(unique_issues_by_category.get('Security', set()))
-        mobile_unique = len(unique_issues_by_category.get('Mobile', set()))
-        broken_links_penalty = min(len(self.broken_links) * 2, 30)
-        
-        best_practices_score = max(0, 100 - (security_unique * 15) - (mobile_unique * 10) - broken_links_penalty)
-        
-        # Overall Score (weighted average)
-        # Performance: 30%, SEO: 25%, Accessibility: 20%, Best Practices: 25%
-        overall_score = int(
-            (performance_score * 0.30) +
-            (seo_score * 0.25) +
-            (accessibility_score * 0.20) +
-            (best_practices_score * 0.25)
-        )
+        final_score = max(0, base_score - critical_deduction - warning_deduction - info_deduction - broken_deduction)
         
         return {
-            'overall': overall_score,
-            'performance': performance_score,
-            'seo': seo_score,
-            'accessibility': accessibility_score,
-            'bestPractices': best_practices_score
+            'overall': final_score,
+            'performance': max(0, 100 - critical_deduction - warning_deduction),
+            'seo': max(0, 100 - len([i for lst in self.issues.values() for i in lst if i.get('category') == 'SEO']) * 8),
+            'accessibility': max(0, 100 - len([i for lst in self.issues.values() for i in lst if i.get('category') == 'Accessibility']) * 10),
+            'bestPractices': max(0, 100 - broken_deduction - len([i for lst in self.issues.values() for i in lst if i.get('category') == 'Security']) * 8)
         }
-
-    def generate_ai_suggestions(self, recommendations):
-        """Generate AI-powered specific fixes using ChatGPT"""
-        if not self.ai_enabled or not AI_AVAILABLE or not self.openai_api_key:
-            return recommendations
-        
-        try:
-            client = OpenAI(api_key=self.openai_api_key)
-            
-            print("\n🤖 Generating AI-powered fix suggestions...")
-            
-            for rec in recommendations:
-                # Create detailed prompt
-                affected_urls_str = '\n'.join(rec.get('affected_urls', [])[:3])
-                
-                prompt = f"""You are a web development expert. Analyze this website audit issue and provide specific, actionable fixes.
-
-Issue Details:
-- Category: {rec['category']}
-- Problem: {rec['title']}
-- Description: {rec['description']}
-- Affected URLs (sample):
-{affected_urls_str}
-
-Provide:
-1. Root cause analysis (1-2 sentences)
-2. Step-by-step fix instructions (3-5 specific steps)
-3. Code example if applicable
-4. Expected impact on score
-
-Be technical, specific, and actionable. Keep response under 300 words."""
-
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",  # Cheap and fast
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=500,
-                    temperature=0.7
-                )
-                
-                rec['ai_suggestion'] = response.choices[0].message.content
-                print(f"  ✓ Generated suggestion for: {rec['title']}")
-                
-        except Exception as e:
-            print(f"⚠️  AI suggestion generation failed: {str(e)}")
-        
-        return recommendations
-
-    def generate_ai_suggestions_for_issues(self):
-        """Generate AI suggestions for individual detailed issues"""
-        if not self.ai_enabled or not AI_AVAILABLE or not self.openai_api_key:
-            return
-        
-        try:
-            client = OpenAI(api_key=self.openai_api_key)
-            
-            print("\n🤖 Generating AI suggestions for detailed issues...")
-            
-            # Process SEO and Accessibility issues (most common)
-            processed = 0
-            max_to_process = 10  # Limit to avoid too many API calls
-            
-            for issue_list in self.issues.values():
-                for issue in issue_list:
-                    if processed >= max_to_process:
-                        break
-                    
-                    # Only process issues that don't already have good suggestions
-                    if issue.get('category') in ['SEO', 'Accessibility', 'Performance']:
-                        prompt = f"""As a web expert, provide a specific fix for this issue:
-
-Issue: {issue.get('title')}
-Page: {issue.get('page', 'Homepage')}
-Current: {issue.get('current', 'Not set')}
-
-Provide:
-1. One example fix (actual code/text, not instructions)
-2. Keep it under 100 words
-
-Example format:
-<title>Subaru South Africa | New & Used Cars</title>
-OR
-<meta name="description" content="...specific description...">"""
-
-                        response = client.chat.completions.create(
-                            model="gpt-4o-mini",
-                            messages=[{"role": "user", "content": prompt}],
-                            max_tokens=200,
-                            temperature=0.7
-                        )
-                        
-                        issue['ai_example'] = response.choices[0].message.content.strip()
-                        processed += 1
-                        print(f"  ✓ Generated example for: {issue.get('title')}")
-                
-                if processed >= max_to_process:
-                    break
-                    
-        except Exception as e:
-            print(f"⚠️  AI examples failed: {str(e)}")
-
+    
     def run_audit(self):
         """Run complete audit"""
         print(f"\n{'='*60}")
@@ -607,27 +460,13 @@ OR
         # Check broken links
         self.check_broken_links()
         
-        # Generate AI examples for issues
-        if self.ai_enabled:
-            self.generate_ai_suggestions_for_issues()
-        
         # Generate recommendations
         recommendations = self.generate_recommendations()
-        
-        # Generate AI suggestions if enabled
-        if self.ai_enabled:
-            recommendations = self.generate_ai_suggestions(recommendations)
         
         # Calculate scores
         scores = self.calculate_score()
         
         self.send_progress("Audit complete! Preparing report...")
-        
-        # Collect all detailed issues
-        all_issues = []
-        for issue_list in self.issues.values():
-            for issue in issue_list:
-                all_issues.append(issue)
         
         # Prepare report
         report = {
@@ -641,7 +480,6 @@ OR
                 'external_links': len(self.external_links)
             },
             'recommendations': recommendations,
-            'detailed_issues': all_issues,  # NEW: All issues with details
             'broken_links': self.broken_links,
             'page_speeds': self.page_speeds
         }
