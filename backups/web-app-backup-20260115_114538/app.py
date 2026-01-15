@@ -57,13 +57,7 @@ def run_audit_stream():
             # Run audit in background thread
             def run_in_background():
                 try:
-                    auditor = WebsiteAuditor(
-                        url, 
-                        max_pages=max_pages, 
-                        progress_queue=q,
-                        ai_enabled=True,
-                        openai_api_key=os.environ.get('OPENAI_API_KEY')
-                    )
+                    auditor = WebsiteAuditor(url, max_pages=max_pages, progress_queue=q)
                     report = auditor.run_audit()
                     q.put({'type': 'complete', 'data': report})
                 except Exception as e:
@@ -263,30 +257,16 @@ def generate_pdf_report(report):
     story.append(stats_table)
     story.append(Spacer(1, 0.3 * inch))
     
-    # Recommendations Section with AI Enhancement
-    story.append(Paragraph("Recommendations & Implementation Plan", heading_style))
+    # Recommendations Section
+    story.append(Paragraph("Recommendations", heading_style))
     
-    # Sort by AI priority score if available
-    sorted_recs = sorted(report['recommendations'], 
-                         key=lambda x: x.get('ai_priority_score', 5), 
-                         reverse=True)
-    
-    for i, rec in enumerate(sorted_recs, 1):
+    for i, rec in enumerate(report['recommendations'], 1):
         priority = "🔴 CRITICAL" if rec['priority'] == 'critical' else "🟡 WARNING"
-        ai_score = rec.get('ai_priority_score', 'N/A')
-        
         story.append(Paragraph(f"<b>{i}. [{rec['category']}] {rec['title']}</b>", styles['Normal']))
-        story.append(Paragraph(f"<i>Priority: {priority} | Impact Score: {ai_score}/10</i>", styles['Normal']))
-        
-        # Use AI recommendation if available, otherwise use default
-        if rec.get('ai_recommendation'):
-            ai_rec = rec['ai_recommendation'].replace('\n', '<br/>')
-            story.append(Paragraph(ai_rec, styles['Normal']))
-        else:
-            story.append(Paragraph(f"Description: {rec['description']}", styles['Normal']))
-            story.append(Paragraph(f"<b>Recommendation:</b> {rec['recommendation']}", styles['Normal']))
-        
-        story.append(Spacer(1, 0.2 * inch))
+        story.append(Paragraph(f"<i>Priority: {priority}</i>", styles['Normal']))
+        story.append(Paragraph(f"Description: {rec['description']}", styles['Normal']))
+        story.append(Paragraph(f"<b>Recommendation:</b> {rec['recommendation']}", styles['Normal']))
+        story.append(Spacer(1, 0.15 * inch))
     
     # Detailed Issues Section
     if report.get('detailed_issues'):

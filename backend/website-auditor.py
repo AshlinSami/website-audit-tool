@@ -19,6 +19,8 @@ class WebsiteAuditor:
     def __init__(self, base_url, max_pages=50, progress_queue=None):
         self.base_url = base_url.rstrip('/')
         self.domain = urlparse(base_url).netloc
+        self.domain_without_www = self.domain.replace('www.', '')
+        self.domain_with_www = 'www.' + self.domain_without_www if not self.domain.startswith('www.') else self.domain
         self.max_pages = max_pages
         self.progress_queue = progress_queue
         self.visited_urls = set()
@@ -51,11 +53,20 @@ class WebsiteAuditor:
         """Fetch a page and return response"""
         try:
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Website Audit Tool) Algorithm Agency'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
+            print(f"  🌐 Fetching {url}...")
             response = requests.get(url, headers=headers, timeout=10, allow_redirects=True, verify=False)
+            print(f"  📡 Response: {response.status_code} ({len(response.content)} bytes)")
             return response
+        except requests.exceptions.Timeout:
+            print(f"  ⚠️ Timeout fetching {url}")
+            return None
+        except requests.exceptions.ConnectionError as e:
+            print(f"  ⚠️ Connection error fetching {url}: {str(e)}")
+            return None
         except Exception as e:
+            print(f"  ⚠️ Exception fetching {url}: {type(e).__name__} - {str(e)}")
             return None
     
     def analyze_page_speed(self, url, response):
@@ -256,18 +267,24 @@ class WebsiteAuditor:
     
     def crawl_page(self, url):
         """Crawl a single page and extract information"""
-        if url in self.visited_urls or len(self.visited_urls) >= self.max_pages:
+        if url in self.visited_urls:
+            print(f"⏭️  Already visited: {url}")
+            return
+        
+        if len(self.visited_urls) >= self.max_pages:
+            print(f"🛑 Max pages reached: {len(self.visited_urls)}/{self.max_pages}")
             return
         
         # Send progress update
         page_name = url.replace(self.base_url, '') or '/'
         self.send_progress(f'Crawling: {page_name}')
         
-        print(f"Crawling: {url}")
+        print(f"\n🔍 Crawling: {url}")
         self.visited_urls.add(url)
         
         response = self.fetch_page(url)
         if not response:
+            print(f"❌ Failed to fetch: {url}")
             self.broken_links.append({
                 'url': url, 
                 'status': 'Failed to fetch',
@@ -276,16 +293,20 @@ class WebsiteAuditor:
             })
             return
         
+        print(f"✅ Successfully fetched: {url} (Status: {response.status_code})")
+        
         # Check for redirects
         if response.history:
+            print(f"🔀 Redirect detected: {url} -> {response.url}")
             self.redirects.append({
                 'from': url,
                 'to': response.url,
                 'status_codes': [r.status_code for r in response.history]
             })
         
-        # Check status code
-        if response.status_code >= 400:
+        # Check status code - but allow 415 (some sites return this but still provide content)
+        if response.status_code >= 400 and response.status_code != 415:
+            print(f"❌ Error status code: {response.status_code}")
             self.broken_links.append({
                 'url': url, 
                 'status': response.status_code,
@@ -293,9 +314,15 @@ class WebsiteAuditor:
                 'error': f'HTTP {response.status_code} error'
             })
             return
+        elif response.status_code == 415:
+            print(f"⚠️  Warning: Status 415 (Unsupported Media Type) but continuing with content")
         
         # Parse HTML
-        soup = BeautifulSoup(response.content, 'html.parser')
+        try:
+            soup = BeautifulSoup(response.content, 'html.parser')
+        except Exception as e:
+            print(f"❌ Failed to parse HTML: {str(e)}")
+            return
         
         # Analyze page speed
         speed_data = self.analyze_page_speed(url, response)
@@ -316,7 +343,13 @@ class WebsiteAuditor:
         self.issues['critical'].extend(self.check_render_blocking_resources(soup, url))
         
         # Extract all links
-        for link in soup.find_all('a', href=True):
+        all_page_links = soup.find_all('a', href=True)
+        print(f"📎 Found {len(all_page_links)} links on page")
+        
+        internal_links_found = 0
+        external_links_found = 0
+        
+        for link in all_page_links:
             href = link['href']
             full_url = urljoin(url, href)
             parsed = urlparse(full_url)
@@ -327,19 +360,32 @@ class WebsiteAuditor:
             
             self.all_links.add(full_url)
             
-            # Check if internal or external
-            if parsed.netloc == self.domain or not parsed.netloc:
+            # Check if internal or external (handle both www and non-www)
+            is_internal = (
+                parsed.netloc == self.domain or 
+                parsed.netloc == self.domain_without_www or 
+                parsed.netloc == self.domain_with_www or 
+                not parsed.netloc
+            )
+            
+            if is_internal:
                 # Internal link - add to crawl queue
                 if full_url not in self.visited_urls:
+                    internal_links_found += 1
+                    print(f"  → Internal link found: {full_url}")
                     self.crawl_page(full_url)
             else:
                 # External link
+                external_links_found += 1
                 self.external_links.add(full_url)
+        
+        print(f"📊 Stats for this page: {internal_links_found} internal, {external_links_found} external")
+        print(f"📈 Total progress: {len(self.visited_urls)}/{self.max_pages} pages crawled")
     
     def check_broken_links(self):
         """Check all found links for broken ones - DISABLED for performance"""
         self.send_progress("Skipping external broken link check...")
-        print("\nSkipping external broken link check for better performance...")
+        print("\n⏭️  Skipping external broken link check for better performance...")
         # Skip checking external links to avoid timeouts
         # Only report broken links found during crawling
         return
@@ -347,6 +393,7 @@ class WebsiteAuditor:
     def generate_recommendations(self):
         """Generate specific recommendations based on findings"""
         self.send_progress("Generating recommendations...")
+        print("\n📝 Generating recommendations...")
         recommendations = []
         
         # Broken links recommendation
@@ -426,6 +473,7 @@ class WebsiteAuditor:
     def calculate_score(self):
         """Calculate overall score based on issues"""
         self.send_progress("Calculating scores...")
+        print("\n🧮 Calculating scores...")
         base_score = 100
         
         # Deduct points for issues
@@ -450,12 +498,17 @@ class WebsiteAuditor:
         """Run complete audit"""
         print(f"\n{'='*60}")
         print(f"Starting Website Audit for: {self.base_url}")
+        print(f"Max pages to crawl: {self.max_pages}")
         print(f"{'='*60}\n")
         
         self.send_progress(f"Starting audit of {self.base_url}")
         
         # Crawl website
         self.crawl_page(self.base_url)
+        
+        print(f"\n{'='*60}")
+        print(f"Crawling complete! Crawled {len(self.visited_urls)} pages")
+        print(f"{'='*60}\n")
         
         # Check broken links
         self.check_broken_links()
@@ -467,6 +520,7 @@ class WebsiteAuditor:
         scores = self.calculate_score()
         
         self.send_progress("Audit complete! Preparing report...")
+        print("\n✅ Audit complete! Preparing report...")
         
         # Prepare report
         report = {

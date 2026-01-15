@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Audit Tool - Algorithm Agency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        #progressLog {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #progressLog::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #progressLog::-webkit-scrollbar-track {
+            background: #0f172a;
+            border-radius: 4px;
+        }
+
+        #progressLog::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        #progressLog::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+            .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            color: #94a3b8;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .tab-btn:hover {
+            background: rgba(51, 65, 85, 0.5);
+            color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+        .tab-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 min-h-screen">
+    <!-- Animated background grid -->
+    <div class="fixed inset-0 opacity-20 pointer-events-none">
+        <div class="absolute inset-0" style="background-image: linear-gradient(to right, rgba(148, 163, 184, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(148, 163, 184, 0.1) 1px, transparent 1px); background-size: 50px 50px;"></div>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-6 py-12">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <div class="inline-block mb-6">
+                <div class="flex items-center gap-3 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-6 py-3 rounded-full border border-cyan-500/30">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span class="text-cyan-400 font-semibold text-sm tracking-wider uppercase">Website Auditor</span>
+                </div>
+            </div>
+            <h1 class="text-6xl font-black mb-4 bg-gradient-to-r from-slate-100 via-slate-300 to-slate-100 bg-clip-text text-transparent leading-tight">
+                Professional Website<br />Audit Tool
+            </h1>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+                Comprehensive analysis of performance, SEO, accessibility, and technical health
+            </p>
+        </div>
+
+        <!-- Audit Form -->
+        <div id="auditForm" class="max-w-3xl mx-auto mb-16">
+            <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl">
+                <label class="block text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wider">
+                    Website URL
+                </label>
+                <div class="flex gap-4 mb-4">
+                    <div class="flex-1 relative">
+                        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <input
+                            type="url"
+                            id="urlInput"
+                            placeholder="https://example.com"
+                            class="w-full pl-12 pr-4 py-4 bg-slate-950 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                            required
+                        />
+                    </div>
+                    <button
+                        id="startAuditBtn"
+                        onclick="startAudit()"
+                        class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 rounded-xl font-bold text-white shadow-lg hover:shadow-cyan-500/25 transition-all flex items-center gap-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Start Audit
+                    </button>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-slate-400">Max Pages:</label>
+                        <input
+                            type="number"
+                            id="maxPagesInput"
+                            value="100"
+                            min="1"
+                            max="700"
+                            class="w-24 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-cyan-500"
+                        />
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        <span class="font-semibold text-amber-400">⚠️ Note:</span> Large sites (400+ pages) may take 15-20 minutes
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="progressSection" class="max-w-4xl mx-auto mb-16 hidden">
+            <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-slate-300" id="progressText">Starting audit...</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-cyan-400" id="progressPercentage">0%</span>
+                        <svg class="w-5 h-5 text-cyan-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mb-4">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300 ease-out rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-slate-400 mb-2">
+                    <span id="pageCounter">0/0 pages crawled</span>
+                </div>
+                
+                <!-- Live Progress Log -->
+                <div class="mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Live Progress</p>
+                        <button onclick="clearProgressLog()" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
+                    </div>
+                    <div id="progressLog" class="bg-slate-950/50 rounded-lg p-4 border border-slate-800 font-mono text-xs text-slate-400 space-y-1">
+                        <!-- Progress messages will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden animate-fadeIn">
+            <!-- Overall Scores -->
+            <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-100 mb-2">Audit Results</h2>
+                        <p class="text-slate-400 text-sm" id="auditUrl"></p>
+                    </div>
+                    <button
+                        onclick="downloadPDF()"
+                        class="px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-slate-100 flex items-center gap-2 transition-colors border border-slate-700"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Download PDF
+                    </button>
+                </div>
+
+                <div id="scoresGrid" class="grid md:grid-cols-5 gap-6">
+                    <!-- Scores will be injected here -->
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="flex items-center justify-center gap-3 mb-8 flex-wrap">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span>Overview</span>
+                </button>
+                <button onclick="switchTab('issues')" id="tab-issues" class="tab-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <span>Issues</span>
+                </button>
+                <button onclick="switchTab('performance')" id="tab-performance" class="tab-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <span>Performance</span>
+                </button>
+                <button onclick="switchTab('links')" id="tab-links" class="tab-btn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                    <span>Links</span>
+                </button>
+            </div>
+
+            <!-- Tab Container -->
+            <div id="tabContent">
+                <div id="content-overview" class="tab-content">
+
+            <!-- Recommendations Section -->
+            <div id="recommendationsSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
+                <h3 class="text-xl font-bold text-slate-100 mb-6">Recommendations</h3>
+                <div id="recommendationsList" class="space-y-4">
+                    <!-- Recommendations will be injected here -->
+                </div>
+            </div>
+
+            
+                        </div>
+                <div id="content-issues" class="tab-content hidden">
+                    <!-- Detailed Issues Section -->
+        <div class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-slate-100">Detailed Issues</h2>
+                <p class="text-sm text-slate-400">Click to expand for specific fixes</p>
+            </div>
+            <div id="detailedIssuesContainer"></div>
+        </div>
+
+                        </div>
+                
+                <!-- Performance Tab -->
+                <div id="content-performance" class="tab-content hidden">
+                    <!-- Page Speed Analysis -->
+            <div id="pageSpeedSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-100">Page Speed Analysis</h3>
+                        <p class="text-sm text-slate-400">Core Web Vitals metrics per page</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-800">
+                                <th class="text-left py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Page</th>
+                                <th class="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Load Time</th>
+                                <th class="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">FCP</th>
+                                <th class="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">LCP</th>
+                                <th class="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">CLS</th>
+                                <th class="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">FID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pageSpeedTable">
+                            <!-- Page speed data will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+                            </div>
+                
+                <!-- Links Tab -->
+                <div id="content-links" class="tab-content hidden">
+                    <!-- Broken Links Section -->
+            <div id="brokenLinksSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-100">Broken Links</h3>
+                        <p class="text-sm text-slate-400" id="brokenLinksCount">0 broken links found</p>
+                    </div>
+                </div>
+
+                <div id="brokenLinksList" class="space-y-3">
+                    <!-- Broken links will be injected here -->
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div id="statsSection" class="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8 shadow-2xl">
+                <h3 class="text-xl font-bold text-slate-100 mb-6">Statistics</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="bg-slate-950/50 rounded-lg p-4 border border-slate-800 text-center">
+                        <p class="text-xs text-slate-500 font-semibold mb-1">PAGES CRAWLED</p>
+                        <p class="text-2xl font-bold text-slate-100" id="statTotalPages">0</p>
+                    </div>
+                    <div class="bg-slate-950/50 rounded-lg p-4 border border-slate-800 text-center">
+                        <p class="text-xs text-slate-500 font-semibold mb-1">BROKEN LINKS</p>
+                        <p class="text-2xl font-bold text-rose-400" id="statBrokenLinks">0</p>
+                    </div>
+                    <div class="bg-slate-950/50 rounded-lg p-4 border border-slate-800 text-center">
+                        <p class="text-xs text-slate-500 font-semibold mb-1">REDIRECTS</p>
+                        <p class="text-2xl font-bold text-amber-400" id="statRedirects">0</p>
+                    </div>
+                    <div class="bg-slate-950/50 rounded-lg p-4 border border-slate-800 text-center">
+                        <p class="text-xs text-slate-500 font-semibold mb-1">EXTERNAL LINKS</p>
+                        <p class="text-2xl font-bold text-cyan-400" id="statExternalLinks">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div id="footer" class="text-center mt-20">
+            <p class="text-slate-500 text-sm">
+                Built by <span class="text-cyan-400 font-semibold">Algorithm Agency</span> • Professional Website Auditing
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let currentReport = null;
+
+        function addProgressMessage(message) {
+            const log = document.getElementById('progressLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = 'text-cyan-400';
+            div.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearProgressLog() {
+            document.getElementById('progressLog').innerHTML = '';
+        }
+
+        async function startAudit() {
+            const url = document.getElementById('urlInput').value;
+            const maxPages = parseInt(document.getElementById('maxPagesInput').value);
+
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            // Show progress, hide results
+            document.getElementById('progressSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('startAuditBtn').disabled = true;
+            clearProgressLog();
+            
+            addProgressMessage('Starting audit...');
+
+            try {
+                // Use fetch with streaming
+                const response = await fetch('/api/audit-stream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url, max_pages: maxPages })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) {
+                        document.getElementById('startAuditBtn').disabled = false;
+                        break;
+                    }
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Keep incomplete line in buffer
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                handleProgressUpdate(data);
+                            } catch (e) {
+                                console.error('Error parsing:', e, line);
+                            }
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Audit error:', error);
+                alert('Error running audit: ' + error.message);
+                document.getElementById('progressSection').classList.add('hidden');
+                document.getElementById('startAuditBtn').disabled = false;
+                addProgressMessage('❌ Error: ' + error.message);
+            }
+        }
+
+        function handleProgressUpdate(data) {
+            if (data.type === 'progress') {
+                document.getElementById('progressText').textContent = data.message;
+                document.getElementById('progressPercentage').textContent = data.percentage + '%';
+                document.getElementById('progressBar').style.width = data.percentage + '%';
+                document.getElementById('pageCounter').textContent = `${data.pages_crawled}/${data.max_pages} pages crawled`;
+                addProgressMessage(data.message);
+            } else if (data.type === 'complete') {
+                currentReport = data.data;
+                setTimeout(() => {
+                    document.getElementById('progressSection').classList.add('hidden');
+                    displayResults(data.data);
+                    document.getElementById('startAuditBtn').disabled = false;
+                    addProgressMessage('✅ Audit complete!');
+                }, 500);
+            } else if (data.type === 'error') {
+                alert('Audit error: ' + data.message);
+                document.getElementById('progressSection').classList.add('hidden');
+                document.getElementById('startAuditBtn').disabled = false;
+                addProgressMessage('❌ Error: ' + data.message);
+            } else if (data.type === 'heartbeat') {
+                // Keep connection alive
+                console.log('Heartbeat received');
+            }
+        }
+
+        function displayResults(report) {
+            // Display URL and date
+            document.getElementById('auditUrl').textContent = report.url + ' • ' + new Date(report.timestamp).toLocaleDateString();
+
+            // Display scores
+            const scoresGrid = document.getElementById('scoresGrid');
+            scoresGrid.innerHTML = `
+                <div class="text-center">
+                    <div class="inline-flex items-center justify-center w-24 h-24 rounded-2xl ${getScoreBgColor(report.scores.overall)} border-2 ${getScoreBorderColor(report.scores.overall)} mb-3">
+                        <span class="text-3xl font-black ${getScoreColor(report.scores.overall)}">${report.scores.overall}</span>
+                    </div>
+                    <p class="text-sm font-bold text-slate-300 uppercase tracking-wider">Overall</p>
+                </div>
+                ${renderScoreCard('Performance', report.scores.performance)}
+                ${renderScoreCard('SEO', report.scores.seo)}
+                ${renderScoreCard('Accessibility', report.scores.accessibility)}
+                ${renderScoreCard('Best Practices', report.scores.bestPractices)}
+            `;
+
+            // Display recommendations
+            const recommendationsList = document.getElementById('recommendationsList');
+            if (report.recommendations && report.recommendations.length > 0) {
+                recommendationsList.innerHTML = report.recommendations.map(rec => `
+                    <div class="bg-slate-950/50 rounded-xl p-5 border border-slate-800">
+                        <div class="flex items-start gap-3 mb-3">
+                            <span class="px-2 py-1 ${rec.priority === 'critical' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'} text-xs font-bold rounded uppercase tracking-wider">
+                                ${rec.category}
+                            </span>
+                            <span class="px-2 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded">
+                                ${rec.affected_count} affected
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-slate-100 mb-2">${rec.title}</h4>
+                        <p class="text-sm text-slate-400 mb-3">${rec.description}</p>
+                        ${rec.affected_urls && rec.affected_urls.length > 0 ? `
+                            <div class="mb-3">
+                                <p class="text-xs text-slate-500 font-semibold mb-2">AFFECTED URLS (showing first ${Math.min(rec.affected_urls.length, 5)}):</p>
+                                <div class="space-y-1">
+                                    ${rec.affected_urls.slice(0, 5).map(url => `
+                                        <p class="text-xs text-slate-400 truncate">• ${url}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="bg-slate-900/50 rounded-lg p-3 border border-slate-800">
+                            <p class="text-xs text-slate-500 font-semibold mb-1">RECOMMENDATION:</p>
+                            <p class="text-xs text-slate-300">${rec.recommendation}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                recommendationsList.innerHTML = '<p class="text-slate-400">No major issues found! 🎉</p>';
+            }
+
+            // Display page speeds
+            const pageSpeedTable = document.getElementById('pageSpeedTable');
+            if (report.page_speeds && report.page_speeds.length > 0) {
+                pageSpeedTable.innerHTML = report.page_speeds.map((page, index) => `
+                    <tr class="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                        <td class="py-3 px-4 text-sm font-medium text-slate-300 truncate max-w-xs">${page.page}</td>
+                        <td class="py-3 px-4 text-sm text-right">
+                            <span class="${page.loadTime > 3 ? 'text-rose-400' : page.loadTime > 2 ? 'text-amber-400' : 'text-emerald-400'}">
+                                ${page.loadTime}s
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-right text-slate-400">${page.fcp}s</td>
+                        <td class="py-3 px-4 text-sm text-right">
+                            <span class="${page.lcp > 4 ? 'text-rose-400' : page.lcp > 2.5 ? 'text-amber-400' : 'text-emerald-400'}">
+                                ${page.lcp}s
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-right">
+                            <span class="${page.cls > 0.1 ? 'text-rose-400' : page.cls > 0.05 ? 'text-amber-400' : 'text-emerald-400'}">
+                                ${page.cls.toFixed(3)}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-right">
+                            <span class="${page.fid > 100 ? 'text-rose-400' : page.fid > 50 ? 'text-amber-400' : 'text-emerald-400'}">
+                                ${page.fid}ms
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                pageSpeedTable.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-400">No page speed data available</td></tr>';
+            }
+
+            // Display broken links
+            document.getElementById('brokenLinksCount').textContent = `${report.broken_links.length} broken links found`;
+
+            // Display detailed issues
+            displayDetailedIssues(report);
+            const brokenLinksList = document.getElementById('brokenLinksList');
+            if (report.broken_links && report.broken_links.length > 0) {
+                brokenLinksList.innerHTML = report.broken_links.map(link => `
+                    <div class="bg-slate-950/50 rounded-lg p-4 border border-rose-900/30">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-mono text-rose-400 truncate mb-1">${link.url}</p>
+                                <p class="text-xs text-slate-500">Status: ${link.status} • ${link.error || 'Unknown error'}</p>
+                            </div>
+                            <span class="px-2 py-1 bg-rose-500/20 text-rose-400 text-xs font-bold rounded shrink-0">
+                                ${link.status}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                brokenLinksList.innerHTML = '<p class="text-sm text-slate-400">No broken links found! 🎉</p>';
+            }
+
+            // Display statistics
+            document.getElementById('statTotalPages').textContent = report.statistics.total_pages;
+            document.getElementById('statBrokenLinks').textContent = report.statistics.broken_links;
+            document.getElementById('statRedirects').textContent = report.statistics.redirects;
+            document.getElementById('statExternalLinks').textContent = report.statistics.external_links;
+
+            document.getElementById('resultsSection').classList.remove('hidden');
+        }
+
+        function renderScoreCard(label, value) {
+            return `
+                <div class="text-center">
+                    <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700 mb-3">
+                        <span class="text-2xl font-black ${getScoreColor(value)}">${value}</span>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">${label}</p>
+                </div>
+            `;
+        }
+
+        function getScoreColor(score) {
+            if (score >= 90) return 'text-emerald-400';
+            if (score >= 70) return 'text-amber-400';
+            return 'text-rose-400';
+        }
+
+        function getScoreBgColor(score) {
+            if (score >= 90) return 'bg-emerald-500/20';
+            if (score >= 70) return 'bg-amber-500/20';
+            return 'bg-rose-500/20';
+        }
+
+        function getScoreBorderColor(score) {
+            if (score >= 90) return 'border-emerald-500/50';
+            if (score >= 70) return 'border-amber-500/50';
+            return 'border-rose-500/50';
+        }
+
+        async function downloadPDF() {
+            if (!currentReport) {
+                alert('No report available');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/download-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ report: currentReport })
+                });
+
+                if (!response.ok) {
+                    throw new Error('PDF generation failed');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `audit-report-${Date.now()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                alert('Error downloading PDF: ' + error.message);
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startAudit();
+            }
+        });
+
+
+        function displayDetailedIssues(report) {
+            console.log('=== displayDetailedIssues DEBUG ===');
+            console.log('Report:', report);
+            console.log('Detailed issues count:', report.detailed_issues?.length);
+            console.log('Sample issue:', report.detailed_issues?.[0]);
+            const container = document.getElementById('detailedIssuesContainer');
+            if (!container) {
+                console.error('detailedIssuesContainer not found!');
+                return;
+            }
+            if (!report.detailed_issues || report.detailed_issues.length === 0) {
+                container.innerHTML = '<p class="text-slate-400">No detailed issues available</p>';
+                return;
+            }
+            
+            // Group by category
+            const grouped = {};
+            report.detailed_issues.forEach(issue => {
+                const cat = issue.category || 'Other';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(issue);
+            });
+            
+            console.log('Grouped issues:', grouped);
+            console.log('Categories:', Object.keys(grouped));
+            
+            const html = Object.entries(grouped).map(([category, issues]) => `
+                <div class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <h3 class="text-lg font-bold text-slate-100">${category}</h3>
+                        <span class="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded-full">${issues.length}</span>
+                    </div>
+                    <div class="space-y-3">${issues.map((issue, idx) => `
+                        <div class="bg-slate-950/50 rounded-lg border border-slate-800 overflow-hidden">
+                            <button onclick="toggleIssue('${category}-${idx}')" class="w-full flex items-center justify-between p-4 hover:bg-slate-800/30 transition text-left">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <span class="w-2 h-2 rounded-full ${issue.type === 'warning' ? 'bg-amber-500' : 'bg-rose-500'}"></span>
+                                        <h4 class="font-semibold text-slate-200">${issue.title}</h4>
+                                    </div>
+                                    <p class="text-xs text-slate-500">Page: ${issue.page || issue.url || 'N/A'}</p>
+                                </div>
+                                <svg id="icon-${category}-${idx}" class="w-5 h-5 text-slate-400 transition transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="detail-${category}-${idx}" class="hidden border-t border-slate-800 p-4 bg-slate-900/30">
+                                ${issue.current ? `<div class="mb-3"><p class="text-xs font-semibold text-slate-400 uppercase mb-1">CURRENT:</p><div class="bg-slate-950/50 rounded p-3 border border-slate-800"><code class="text-sm text-rose-400">${escapeHtml(String(issue.current))}</code></div></div>` : ''}
+                                ${issue.fix ? `<div><p class="text-xs font-semibold text-emerald-400 uppercase mb-1">✓ HOW TO FIX:</p><div class="bg-emerald-950/20 rounded p-3 border border-emerald-900/30"><p class="text-sm text-slate-300">${escapeHtml(issue.fix)}</p></div></div>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}</div>
+                </div>
+            `).join('');
+            
+            console.log('Generated HTML length:', html.length);
+            console.log('First 200 chars:', html.substring(0, 200));
+            container.innerHTML = html;
+            console.log('Container updated!');
+        }
+        
+        function toggleIssue(id) {
+            const detail = document.getElementById('detail-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if (detail.classList.contains('hidden')) {
+                detail.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                detail.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function switchTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            const tabContent = document.getElementById('content-' + tabName);
+            const tabBtn = document.getElementById('tab-' + tabName);
+            
+            if (!tabContent) {
+                console.error('Tab content not found:', 'content-' + tabName);
+                return;
+            }
+            
+            tabContent.classList.remove('hidden');
+            tabBtn.classList.add('active');
+            
+            console.log('Tab switched. Hidden?', tabContent.classList.contains('hidden'));
+        }
+    </script>
+</body>
+</html>

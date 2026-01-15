@@ -4,7 +4,6 @@ Website Audit Tool - Algorithm Agency
 Comprehensive website analysis tool for performance, SEO, accessibility, and technical health
 """
 
-import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
@@ -25,7 +24,7 @@ except ImportError:
     print("⚠️ OpenAI not installed. AI suggestions disabled.")
 
 class WebsiteAuditor:
-    def __init__(self, base_url, max_pages=50, progress_queue=None, ai_enabled=True, openai_api_key=None):
+    def __init__(self, base_url, max_pages=50, progress_queue=None):
         self.base_url = base_url.rstrip('/')
         self.domain = urlparse(base_url).netloc
         self.max_pages = max_pages
@@ -42,8 +41,8 @@ class WebsiteAuditor:
             'warnings': [],
             'info': []
         }
-        self.ai_enabled = ai_enabled
-        self.openai_api_key = openai_api_key or os.environ.get('OPENAI_API_KEY')
+        self.ai_enabled = False  # Set to True to enable AI suggestions
+        self.openai_api_key = None  # OpenAI API key
     
     def send_progress(self, message, **kwargs):
         """Send progress update to queue if available"""
@@ -59,19 +58,16 @@ class WebsiteAuditor:
             self.progress_queue.put(data)
         
     def fetch_page(self, url):
-        """Fetch a page with proper browser headers"""
+        """Fetch a page and return response"""
         try:
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Connection': 'keep-alive'
+                'User-Agent': 'Mozilla/5.0 (Website Audit Tool) Algorithm Agency'
             }
-            response = requests.get(url, headers=headers, timeout=15, allow_redirects=True, verify=False)
+            response = requests.get(url, headers=headers, timeout=10, allow_redirects=True, verify=False)
             return response
         except Exception as e:
-            print(f"Error fetching {url}: {str(e)}")
             return None
+    
     def analyze_page_speed(self, url, response):
         """Analyze page load time and resource sizes"""
         start_time = time.time()
@@ -308,22 +304,17 @@ class WebsiteAuditor:
                 'status_codes': [r.status_code for r in response.history]
             })
         
-        # Check status code (but allow parsing if we got HTML content)
+        # Check status code
         if response.status_code >= 400:
-            # Only skip if we didn't get usable HTML content
-            if len(response.content) < 1000:  # Too small to be real HTML
-                self.broken_links.append({
-                    'url': url, 
-                    'status': response.status_code,
-                    'page': page_name,
-                    'error': f'HTTP {response.status_code} error'
-                })
-                return
-            # Otherwise continue parsing (some servers return 4xx but with valid HTML)
+            self.broken_links.append({
+                'url': url, 
+                'status': response.status_code,
+                'page': page_name,
+                'error': f'HTTP {response.status_code} error'
+            })
+            return
         
         # Parse HTML
-        print(f"  DEBUG: Response status={response.status_code}, content_length={len(response.content)}")
-        print(f"  DEBUG: First 200 chars: {response.text[:200]}")
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Analyze page speed
@@ -345,10 +336,7 @@ class WebsiteAuditor:
         self.issues['critical'].extend(self.check_render_blocking_resources(soup, url))
         
         # Extract all links
-        all_a_tags = soup.find_all('a', href=True)
-        print(f"  DEBUG: Found {len(all_a_tags)} <a> tags on {url}")
-        
-        for link in all_a_tags:
+        for link in soup.find_all('a', href=True):
             href = link['href']
             full_url = urljoin(url, href)
             parsed = urlparse(full_url)
@@ -376,94 +364,6 @@ class WebsiteAuditor:
         # Only report broken links found during crawling
         return
     
-
-    def generate_enhanced_ai_recommendations(self, recommendations):
-        """Generate professional SEO agency-level recommendations with AI using actual issue data"""
-        if not self.ai_enabled or not AI_AVAILABLE or not self.openai_api_key:
-            return recommendations
-        
-        try:
-            from openai import OpenAI
-            client = OpenAI(api_key=self.openai_api_key)
-            
-            print("\n🤖 Generating professional SEO recommendations with real data...")
-            
-            for rec in recommendations:
-                # Get actual examples from detailed_issues
-                category = rec['category']
-                issue_examples = []
-                
-                # Find related detailed issues to get real data
-                if hasattr(self, 'issues') and category in self.issues:
-                    issue_examples = self.issues[category][:3]  # Get first 3 examples
-                
-                # Build examples string with actual data
-                examples_str = ""
-                if issue_examples:
-                    examples_str = "\n\nACTUAL EXAMPLES FROM YOUR SITE:\n"
-                    for i, issue in enumerate(issue_examples, 1):
-                        examples_str += f"\nExample {i}:\n"
-                        examples_str += f"  Page: {issue.get('page', 'N/A')}\n"
-                        if issue.get('current'):
-                            examples_str += f"  Current: {issue.get('current')}\n"
-                        if issue.get('title'):
-                            examples_str += f"  Issue: {issue.get('title')}\n"
-                
-                sample_urls = rec.get('affected_urls', [])[:5]
-                urls_str = '\n'.join(f"- {url}" for url in sample_urls) if sample_urls else "Multiple pages"
-                
-                prompt = f"""You are a senior SEO consultant preparing a client brief with SPECIFIC fixes.
-
-ISSUE SUMMARY:
-Issue: {rec['title']} 
-Category: {rec['category']}
-Description: {rec.get('description', '')}
-Pages Affected: {len(rec.get('affected_urls', []))}
-{examples_str}
-
-Sample URLs:
-{urls_str}
-
-Provide SPECIFIC recommendations:
-
-1. BUSINESS IMPACT (2 sentences):
-   - How this affects rankings, traffic, conversions
-   
-2. SPECIFIC FIXES (3-5 steps with ACTUAL examples):
-   - If it's a title tag issue, show BEFORE and AFTER
-   - If it's meta description, write the actual new description
-   - If it's H1 tag, show the exact H1 to add
-   - Be specific with the actual content from examples above
-
-3. IMPLEMENTATION (1 sentence):
-   - Time: Quick win / Medium effort / Long-term
-   - Who: Developer / Content writer / Marketing team
-
-4. PRIORITY SCORE (1-10):
-   - Based on SEO impact × ease of implementation
-
-Be VERY specific using the actual examples. Don't say "shorten to 60 chars" - show them the exact shortened version!"""
-
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=700,
-                    temperature=0.7
-                )
-                
-                rec['ai_recommendation'] = response.choices[0].message.content
-                
-                # Extract priority
-                priority_match = re.search(r'PRIORITY.*?(\d+)', response.choices[0].message.content, re.IGNORECASE)
-                rec['ai_priority_score'] = int(priority_match.group(1)) if priority_match else 5
-                
-                print(f"  ✓ Generated specific fixes for: {rec['title']}")
-                
-        except Exception as e:
-            print(f"  ⚠ AI error: {str(e)}")
-            
-        return recommendations
-
     def generate_recommendations(self):
         """Generate specific recommendations based on findings"""
         self.send_progress("Generating recommendations...")
@@ -716,7 +616,7 @@ OR
         
         # Generate AI suggestions if enabled
         if self.ai_enabled:
-            recommendations = self.generate_enhanced_ai_recommendations(recommendations)
+            recommendations = self.generate_ai_suggestions(recommendations)
         
         # Calculate scores
         scores = self.calculate_score()
