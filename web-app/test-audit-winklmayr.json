@@ -1,0 +1,103 @@
+{
+  "url": "https://winklmayr.com",
+  "timestamp": "2026-01-15T14:41:39.057087",
+  "scores": {
+    "overall": 75,
+    "performance": 100,
+    "seo": 60,
+    "accessibility": 100,
+    "bestPractices": 40
+  },
+  "statistics": {
+    "total_pages": 1,
+    "broken_links": 0,
+    "redirects": 0,
+    "external_links": 0
+  },
+  "recommendations": [
+    {
+      "priority": "warning",
+      "category": "SEO",
+      "title": "2 SEO issues found",
+      "description": "Missing or suboptimal meta tags and heading structure",
+      "affected_count": 2,
+      "affected_urls": [
+        "https://winklmayr.com",
+        "https://winklmayr.com"
+      ],
+      "recommendation": "Add unique meta descriptions to all pages, optimize title tags (keep under 60 characters), ensure proper heading hierarchy with single H1 per page",
+      "ai_recommendation": "### CLIENT BRIEF\n\n**ISSUE SUMMARY:**\n- **Issue:** 2 SEO issues found \n- **Category:** SEO\n- **Description:** Missing or suboptimal meta tags and heading structure\n- **Pages Affected:** 2\n\n**Sample URLs:**\n- https://winklmayr.com\n- https://winklmayr.com\n\n---\n\n### 1. BUSINESS IMPACT:\nMissing or suboptimal meta tags and heading structures can lead to lower search engine rankings, resulting in decreased organic traffic. This also negatively impacts conversions, as users may not be drawn to click on listings that lack clear, engaging metadata.\n\n---\n\n### 2. SPECIFIC FIXES:\n\n**A. Title Tag Optimization**\n- **Current Title Tag:** \"Winkl Mayr\"\n- **Recommended Title Tag:** \"Winkl Mayr: Premium Outdoor Equipment & Accessories\"\n  \n  **BEFORE:**\n  ```\n  <title>Winkl Mayr</title>\n  ```\n\n  **AFTER:**\n  ```\n  <title>Winkl Mayr: Premium Outdoor Equipment & Accessories</title>\n  ```\n\n**B. Meta Description Enhancement**\n- **Current Meta Description:** (missing)\n- **Recommended Meta Description:** \"Discover high-quality outdoor equipment and accessories at Winkl Mayr. Explore our extensive range designed for adventurers, campers, and outdoor enthusiasts.\"\n\n  **BEFORE:**\n  (missing meta description)\n\n  **AFTER:**\n  ```\n  <meta name=\"description\" content=\"Discover high-quality outdoor equipment and accessories at Winkl Mayr. Explore our extensive range designed for adventurers, campers, and outdoor enthusiasts.\">\n  ```\n\n**C. H1 Tag Structure**\n- **Current H1 Tag:** (missing or suboptimal)\n- **Recommended H1 Tag:** \"Welcome to Winkl Mayr \u2013 Your Destination for Outdoor Adventure Gear\"\n\n  **BEFORE:**\n  ```\n  <h1>Outdoor Gear</h1>\n  ```\n\n  **AFTER:**\n  ```\n  <h1>Welcome to Winkl Mayr \u2013 Your Destination for Outdoor Adventure Gear</h1>\n  ```\n\n---\n\n### 3. IMPLEMENTATION:\n- **Time:** Quick win\n- **Who:** Developer and Content Writer\n\n---\n\n### 4. PRIORITY SCORE:\n- **Score:** 9\n  - This score reflects the high impact of improved visibility and engagement on search engine results, coupled with the relatively straightforward implementation process.",
+      "ai_priority_score": 5
+    },
+    {
+      "priority": "critical",
+      "category": "Security",
+      "title": "4 security issues found",
+      "description": "Missing security headers leave site vulnerable",
+      "affected_count": 4,
+      "recommendation": "Configure server to include security headers: X-Content-Type-Options: nosniff, X-Frame-Options: SAMEORIGIN, Strict-Transport-Security, Content-Security-Policy",
+      "ai_recommendation": "### CLIENT BRIEF: Security Header Issues\n\n---\n\n#### 1. BUSINESS IMPACT:\nThe absence of essential security headers can lead to increased vulnerability to attacks, potentially resulting in data breaches that harm user trust and site credibility. This can negatively impact search engine rankings, leading to reduced organic traffic and lower conversions due to a lack of trust from users.\n\n---\n\n#### 2. SPECIFIC FIXES:\n\n1. **Add Content Security Policy (CSP) Header**\n   - **Before:** No CSP header present.\n   - **After:** \n     ```\n     Content-Security-Policy: default-src 'self'; img-src 'self' data:; script-src 'self' https://trusted-scripts.com; style-src 'self' https://trusted-styles.com;\n     ```\n   - This header helps prevent XSS attacks by controlling the resources the browser is allowed to load.\n\n2. **Implement HTTP Strict Transport Security (HSTS) Header**\n   - **Before:** No HSTS header present.\n   - **After:** \n     ```\n     Strict-Transport-Security: max-age=31536000; includeSubDomains; preload\n     ```\n   - This ensures that browsers connect to your site only using HTTPS, enhancing security.\n\n3. **Add X-Content-Type-Options Header**\n   - **Before:** No X-Content-Type-Options header present.\n   - **After:** \n     ```\n     X-Content-Type-Options: nosniff\n     ```\n   - This prevents browsers from interpreting files as a different MIME type than what is specified, reducing the risk of attacks.\n\n4. **Add X-Frame-Options Header**\n   - **Before:** No X-Frame-Options header present.\n   - **After:** \n     ```\n     X-Frame-Options: DENY\n     ```\n   - This header protects against clickjacking attacks by preventing your site from being embedded in an iframe.\n\n5. **Add X-XSS-Protection Header**\n   - **Before:** No X-XSS-Protection header present.\n   - **After:** \n     ```\n     X-XSS-Protection: 1; mode=block\n     ```\n   - This enables the cross-site scripting filter built into most browsers, blocking pages if an attack is detected.\n\n---\n\n#### 3. IMPLEMENTATION:\n- **Time:** Medium effort\n- **Who:** Developer\n\n---\n\n#### 4. PRIORITY SCORE:\n- **Score:** 8\n- This score reflects the high impact on security (and thus SEO performance) and the moderate effort required for implementation.\n\n--- \n\nBy addressing these security header issues, the site will not only improve its safety but also enhance user trust, leading to better SEO performance and potentially increased conversions.",
+      "ai_priority_score": 5
+    }
+  ],
+  "detailed_issues": [
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Content-Type-Options",
+      "recommendation": "Add X-Content-Type-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Frame-Options",
+      "recommendation": "Add X-Frame-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-XSS-Protection",
+      "recommendation": "Add X-XSS-Protection header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: Strict-Transport-Security",
+      "recommendation": "Add Strict-Transport-Security header to server configuration"
+    },
+    {
+      "type": "warning",
+      "category": "SEO",
+      "title": "Missing meta description",
+      "url": "https://winklmayr.com",
+      "page": "/",
+      "current": "None",
+      "fix": "Add <meta name=\"description\" content=\"...\"> with 150-160 characters",
+      "ai_example": "```html\n<meta name=\"description\" content=\"Discover a wide range of new and used Subaru vehicles at Subaru South Africa. Explore our latest models, special offers, and expert services to find your perfect car today!\">\n```"
+    },
+    {
+      "type": "info",
+      "category": "SEO",
+      "title": "Missing canonical tag",
+      "url": "https://winklmayr.com",
+      "page": "/",
+      "current": "None",
+      "fix": "Add <link rel=\"canonical\" href=\"...\"> to prevent duplicate content issues",
+      "ai_example": "<link rel=\"canonical\" href=\"https://www.example.com/\" />"
+    }
+  ],
+  "broken_links": [],
+  "page_speeds": [
+    {
+      "url": "https://winklmayr.com",
+      "page": "/",
+      "loadTime": 0.0,
+      "fcp": 0.0,
+      "lcp": 0.0,
+      "cls": 0.001,
+      "fid": 0,
+      "content_size": 12032,
+      "status_code": 200
+    }
+  ]
+}

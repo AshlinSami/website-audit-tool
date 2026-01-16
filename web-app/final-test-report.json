@@ -1,0 +1,392 @@
+{
+  "url": "https://winklmayr.com",
+  "timestamp": "2026-01-16T08:39:52.695229",
+  "scores": {
+    "overall": 68,
+    "performance": 75,
+    "seo": 80,
+    "accessibility": 80,
+    "bestPractices": 40
+  },
+  "statistics": {
+    "total_pages": 5,
+    "broken_links": 0,
+    "redirects": 0,
+    "external_links": 1
+  },
+  "recommendations": [
+    {
+      "priority": "warning",
+      "category": "SEO",
+      "title": "1 SEO issues found",
+      "description": "Missing or suboptimal meta tags and heading structure",
+      "affected_count": 1,
+      "affected_urls": [
+        "https://winklmayr.com/collections/all",
+        "https://winklmayr.com/cart"
+      ],
+      "recommendation": "Add unique meta descriptions to all pages, optimize title tags (keep under 60 characters), ensure proper heading hierarchy with single H1 per page",
+      "ai_recommendation": "# Client Brief: SEO Recommendations for Winklmayr\n\n## ISSUE SUMMARY:\n**Issue:** Missing or suboptimal meta tags and heading structure  \n**Category:** SEO  \n**Description:** Missing or suboptimal meta tags and heading structure  \n**Pages Affected:** 2  \n\n### Sample URLs:\n- https://winklmayr.com/collections/all\n- https://winklmayr.com/cart\n\n---\n\n### 1. BUSINESS IMPACT:\nMissing or poorly optimized meta tags can negatively affect search engine rankings, leading to reduced organic traffic. This, in turn, could result in lower conversions, as potential customers may not find the website in search results or may not be compelled to click through to the site.\n\n### 2. SPECIFIC FIXES:\n\n#### Page 1: https://winklmayr.com/collections/all\n- **Title Tag:**\n  - **Before:** \"All Collections\"\n  - **After:** \"Shop All Collections | Winklmayr - Quality Products for Every Need\"\n  \n- **Meta Description:**\n  - **Before:** (Missing)\n  - **After:** \"Explore Winklmayr's full range of products in our all collections page. Discover quality items that suit every need and elevate your lifestyle today!\"\n\n- **H1 Tag:**\n  - **Before:** (Missing)\n  - **After:** \"<h1>All Collections</h1>\"\n  \n#### Page 2: https://winklmayr.com/cart\n- **Title Tag:**\n  - **Before:** \"Cart\"\n  - **After:** \"Your Cart | Winklmayr - Review Your Selected Products\"\n  \n- **Meta Description:**\n  - **Before:** (Missing)\n  - **After:** \"Review your selected items in your Winklmayr cart. Complete your purchase easily and enjoy our quality products delivered to your door!\"\n\n- **H1 Tag:**\n  - **Before:** (Missing)\n  - **After:** \"<h1>Your Cart</h1>\"\n\n### 3. IMPLEMENTATION:\n- **Time:** Quick win\n- **Who:** Developer / Content Writer\n\n### 4. PRIORITY SCORE: 8\nThis score reflects a high SEO impact due to the direct effect on click-through rates (CTR) from search results, combined with the ease of implementation for a developer or content writer.",
+      "ai_priority_score": 8
+    },
+    {
+      "priority": "critical",
+      "category": "Performance",
+      "title": "1 performance issues found",
+      "description": "Render-blocking resources detected that slow down page load",
+      "affected_count": 1,
+      "affected_urls": [
+        "https://winklmayr.com",
+        "https://winklmayr.com/collections/all",
+        "https://winklmayr.com/cart",
+        "https://winklmayr.com/",
+        "https://winklmayr.com/collections/latest"
+      ],
+      "recommendation": "Defer non-critical CSS/JS, add async/defer attributes to scripts, consider inlining critical CSS, implement lazy loading for images",
+      "ai_recommendation": "### CLIENT BRIEF: Performance Issues Fix\n\n---\n\n### 1. BUSINESS IMPACT:\nSlow page load times due to render-blocking resources can negatively impact user experience, leading to higher bounce rates and decreased conversion rates. This, in turn, can affect search engine rankings, as Google considers page speed as a ranking factor.\n\n### 2. SPECIFIC FIXES:\n\n- **Step 1: Optimize CSS Delivery**\n  - **Before:** The CSS file links are included in the head of the HTML document without optimization.\n    ```html\n    <link rel=\"stylesheet\" href=\"https://winklmayr.com/styles/main.css\">\n    ```\n  - **After:** Use `media` attributes to load CSS files conditionally or inline critical CSS. For example:\n    ```html\n    <link rel=\"stylesheet\" href=\"https://winklmayr.com/styles/main.css\" media=\"print\" onload=\"this.media='all'\">\n    ```\n\n- **Step 2: Defer JavaScript Loading**\n  - **Before:** JavaScript files are blocking rendering.\n    ```html\n    <script src=\"https://winklmayr.com/scripts/main.js\"></script>\n    ```\n  - **After:** Use the `defer` attribute to load JavaScript files without blocking HTML parsing:\n    ```html\n    <script src=\"https://winklmayr.com/scripts/main.js\" defer></script>\n    ```\n\n- **Step 3: Use Lazy Loading for Images**\n  - **Before:** All images are loaded at once.\n    ```html\n    <img src=\"https://winklmayr.com/images/product.jpg\" alt=\"Product Image\">\n    ```\n  - **After:** Implement lazy loading to only load images when they are in the viewport:\n    ```html\n    <img src=\"https://winklmayr.com/images/product.jpg\" alt=\"Product Image\" loading=\"lazy\">\n    ```\n\n- **Step 4: Minify CSS and JS Files**\n  - **Before:** Your CSS file is bulky and unminified.\n    ```css\n    .header {\n        background-color: #fff;\n        padding: 20px;\n        color: #333;\n    }\n    ```\n  - **After:** Minify the CSS to reduce file size:\n    ```css\n    .header{background:#fff;padding:20px;color:#333}\n    ```\n\n### 3. IMPLEMENTATION:\n- **Time:** Medium effort\n- **Who:** Developer\n\n### 4. PRIORITY SCORE:\n- **Score:** 8 (High SEO impact with medium implementation effort)\n\n---\n\nThese specific recommendations will help improve the page loading speed significantly, leading to better user experience, increased traffic, and enhanced rankings on search engines.",
+      "ai_priority_score": 5
+    },
+    {
+      "priority": "critical",
+      "category": "Security",
+      "title": "4 security issues found",
+      "description": "Missing security headers leave site vulnerable",
+      "affected_count": 4,
+      "recommendation": "Configure server to include security headers: X-Content-Type-Options: nosniff, X-Frame-Options: SAMEORIGIN, Strict-Transport-Security, Content-Security-Policy",
+      "ai_recommendation": "### CLIENT BRIEF: SECURITY HEADER ISSUES\n\n**ISSUE SUMMARY:**\n- **Issue:** 4 security issues found\n- **Category:** Security\n- **Description:** Missing security headers leave site vulnerable\n- **Pages Affected:** 0\n- **Sample URLs:** Multiple pages\n\n---\n\n### 1. BUSINESS IMPACT:\nThe absence of security headers can negatively impact search engine rankings, as Google prioritizes secure sites in its algorithm. Additionally, vulnerable sites may experience increased bounce rates and lower conversions due to a lack of user trust.\n\n---\n\n### 2. SPECIFIC FIXES:\n\n**Fix 1: Add Content Security Policy (CSP) Header**\n- **BEFORE:** No CSP header present.\n- **AFTER:** Add the following header to your server configuration:\n  ```\n  Content-Security-Policy: default-src 'self'; script-src 'self' https://trustedscripts.example.com;\n  ```\n  \n**Fix 2: Add X-Content-Type-Options Header**\n- **BEFORE:** No X-Content-Type-Options header present.\n- **AFTER:** Add the following header to your server configuration:\n  ```\n  X-Content-Type-Options: nosniff\n  ```\n  \n**Fix 3: Add X-Frame-Options Header**\n- **BEFORE:** No X-Frame-Options header present.\n- **AFTER:** Add the following header to your server configuration:\n  ```\n  X-Frame-Options: DENY\n  ```\n\n**Fix 4: Add Strict-Transport-Security Header**\n- **BEFORE:** No Strict-Transport-Security header present.\n- **AFTER:** Add the following header to your server configuration:\n  ```\n  Strict-Transport-Security: max-age=31536000; includeSubDomains\n  ```\n\n**Fix 5: Add X-XSS-Protection Header**\n- **BEFORE:** No X-XSS-Protection header present.\n- **AFTER:** Add the following header to your server configuration:\n  ```\n  X-XSS-Protection: 1; mode=block\n  ```\n\n---\n\n### 3. IMPLEMENTATION:\n- **Time:** Quick win\n- **Who:** Developer\n\n---\n\n### 4. PRIORITY SCORE:\n- **Score:** 9\n\nThis score reflects the high SEO impact of implementing security headers and the relatively straightforward nature of the required changes.",
+      "ai_priority_score": 5
+    },
+    {
+      "priority": "warning",
+      "category": "Accessibility",
+      "title": "1 accessibility issues found",
+      "description": "Images missing alt text, affecting screen reader users",
+      "affected_count": 1,
+      "affected_urls": [
+        "https://winklmayr.com",
+        "https://winklmayr.com/collections/all",
+        "https://winklmayr.com/cart",
+        "https://winklmayr.com/",
+        "https://winklmayr.com/collections/latest"
+      ],
+      "recommendation": "Add descriptive alt text to all images, ensure proper color contrast, make interactive elements keyboard accessible",
+      "ai_recommendation": "### Client Brief: Accessibility Issues\n\n---\n\n**ISSUE SUMMARY:**\n- **Issue:** 1 accessibility issue found\n- **Category:** Accessibility\n- **Description:** Images missing alt text, affecting screen reader users\n- **Pages Affected:** 5\n\n**Sample URLs:**\n- https://winklmayr.com\n- https://winklmayr.com/collections/all\n- https://winklmayr.com/cart\n- https://winklmayr.com/\n- https://winklmayr.com/collections/latest\n\n---\n\n### 1. BUSINESS IMPACT\n- Missing alt text for images affects the user experience for visually impaired visitors, making it difficult for them to understand the content on the site. This can lead to decreased traffic, lower conversion rates, and ultimately harm the website's rankings due to poor accessibility compliance.\n\n### 2. SPECIFIC FIXES\n\n**Fix 1: Add Alt Text to Images on Homepage**  \n- **Before:** `<img src=\"banner.jpg\">`  \n- **After:** `<img src=\"banner.jpg\" alt=\"Promotional banner for seasonal sale on high-quality outdoor gear\">`\n\n**Fix 2: Add Alt Text to Images on Collections Page**  \n- **Before:** `<img src=\"collection1.jpg\">`  \n- **After:** `<img src=\"collection1.jpg\" alt=\"Collection of the latest arrivals in outdoor clothing\">`\n\n**Fix 3: Add Alt Text to Images in Cart**  \n- **Before:** `<img src=\"product1.jpg\">`  \n- **After:** `<img src=\"product1.jpg\" alt=\"Blue hiking backpack, 30L capacity, waterproof material\">`\n\n**Fix 4: Add Alt Text to Images on Latest Collections Page**  \n- **Before:** `<img src=\"latest1.jpg\">`  \n- **After:** `<img src=\"latest1.jpg\" alt=\"Newest camping equipment including tents and sleeping bags\">`\n\n**Fix 5: Add Alt Text to Additional Images**  \n- **Before:** `<img src=\"icon.png\">`  \n- **After:** `<img src=\"icon.png\" alt=\"Shopping cart icon\">`\n\n### 3. IMPLEMENTATION\n- **Time:** Quick win\n- **Who:** Developer / Content writer\n\n### 4. PRIORITY SCORE\n- **Priority Score:** 9 (High SEO impact and easy implementation)\n\n--- \n\nBy addressing these accessibility issues, the website will not only become more user-friendly for all visitors but also improve its SEO performance and potential conversion rates.",
+      "ai_priority_score": 9
+    }
+  ],
+  "detailed_issues": [
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Content-Type-Options",
+      "recommendation": "Add X-Content-Type-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Frame-Options",
+      "recommendation": "Add X-Frame-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-XSS-Protection",
+      "recommendation": "Add X-XSS-Protection header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: Strict-Transport-Security",
+      "recommendation": "Add Strict-Transport-Security header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Performance",
+      "title": "Render-blocking JavaScript",
+      "url": "https://winklmayr.com",
+      "page": "/",
+      "details": "23 scripts without async/defer",
+      "recommendation": "Add async or defer attributes to script tags",
+      "ai_example": "```html\n<script async src=\"https://example.com/path/to/your/script.js\"></script>\n<title>Winklmayr Leathercraft | Handcrafted Leather Goods</title>\n<meta name=\"description\" content=\"Discover exquisite handcrafted leather products at Winklmayr Leathercraft. Shop our unique collection of bags, wallets, and accessories.\">\n<link rel=\"canonical\" href=\"https://winklmayr.com/\" />\n```"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Content-Type-Options",
+      "recommendation": "Add X-Content-Type-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Frame-Options",
+      "recommendation": "Add X-Frame-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-XSS-Protection",
+      "recommendation": "Add X-XSS-Protection header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: Strict-Transport-Security",
+      "recommendation": "Add Strict-Transport-Security header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Performance",
+      "title": "Render-blocking JavaScript",
+      "url": "https://winklmayr.com/collections/all",
+      "page": "/collections/all",
+      "details": "23 scripts without async/defer",
+      "recommendation": "Add async or defer attributes to script tags",
+      "ai_example": "```html\n<title>Winklmayr | Premium Products Collection</title>\n<meta name=\"description\" content=\"Discover our exclusive collection of Winklmayr products, featuring luxury leather bags and accessories. Shop now!\">\n<link rel=\"canonical\" href=\"https://yourwebsite.com/collections/all\" />\n<script src=\"https://yourwebsite.com/js/non-blocking-script.js\" defer></script>\n```"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Content-Type-Options",
+      "recommendation": "Add X-Content-Type-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Frame-Options",
+      "recommendation": "Add X-Frame-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-XSS-Protection",
+      "recommendation": "Add X-XSS-Protection header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: Strict-Transport-Security",
+      "recommendation": "Add Strict-Transport-Security header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Performance",
+      "title": "Render-blocking JavaScript",
+      "url": "https://winklmayr.com/cart",
+      "page": "/cart",
+      "details": "23 scripts without async/defer",
+      "recommendation": "Add async or defer attributes to script tags",
+      "ai_example": "```html\n<title>Your Shopping Cart - Winklmayr</title>\n<meta name=\"description\" content=\"Review and finalize your selections of luxury leather bags and accessories in your Winklmayr shopping cart.\">\n<link rel=\"canonical\" href=\"https://winklmayr.com/cart\" />\n<script defer src=\"https://example.com/path/to/script.js\"></script>\n``` \n\nThis code snippet optimizes the page by deferring the loading of JavaScript, which helps eliminate render-blocking issues while keeping the content relevant to the shopping cart."
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Content-Type-Options",
+      "recommendation": "Add X-Content-Type-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Frame-Options",
+      "recommendation": "Add X-Frame-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-XSS-Protection",
+      "recommendation": "Add X-XSS-Protection header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: Strict-Transport-Security",
+      "recommendation": "Add Strict-Transport-Security header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Performance",
+      "title": "Render-blocking JavaScript",
+      "url": "https://winklmayr.com/",
+      "page": "/",
+      "details": "20 scripts without async/defer",
+      "recommendation": "Add async or defer attributes to script tags",
+      "ai_example": "```html\n<script async src=\"https://example.com/path/to/your/script.js\"></script>\n```\n\nThis code snippet replaces your render-blocking JavaScript with an asynchronous script loading method. By adding the `async` attribute, the script will load without blocking the rendering of the page, improving your website's performance while maintaining the focus on Winklmayr Leathercraft's offerings."
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Content-Type-Options",
+      "recommendation": "Add X-Content-Type-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-Frame-Options",
+      "recommendation": "Add X-Frame-Options header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: X-XSS-Protection",
+      "recommendation": "Add X-XSS-Protection header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Security",
+      "title": "Missing security header: Strict-Transport-Security",
+      "recommendation": "Add Strict-Transport-Security header to server configuration"
+    },
+    {
+      "type": "critical",
+      "category": "Performance",
+      "title": "Render-blocking JavaScript",
+      "url": "https://winklmayr.com/collections/latest",
+      "page": "/collections/latest",
+      "details": "23 scripts without async/defer",
+      "recommendation": "Add async or defer attributes to script tags",
+      "ai_example": "```html\n<title>Latest Collections | Winklmayr</title>\n<meta name=\"description\" content=\"Explore the latest arrivals in luxury leather bags and accessories at Winklmayr. Discover exclusive styles and premium quality.\">\n<link rel=\"canonical\" href=\"https://winklmayr.com/collections/latest\" />\n<script defer src=\"path/to/your/script.js\"></script>\n``` \n\nThis example sets the page title and description relevant to the latest collection while deferring the loading of JavaScript to prevent render-blocking."
+    },
+    {
+      "type": "warning",
+      "category": "Accessibility",
+      "title": "Images missing alt attributes",
+      "url": "https://winklmayr.com",
+      "page": "/",
+      "details": "15 images without alt text",
+      "examples": [
+        "//winklmayr.com/cdn/shop/files/logo_black.png?v=1714468657&width=100",
+        "//winklmayr.com/cdn/shop/files/Afra-Banner_00043603-ff96-4186-ab17-74886ad969db.jpg?v=1730985957&width=3840",
+        "//winklmayr.com/cdn/shop/files/Afra-Banner_00043603-ff96-4186-ab17-74886ad969db.jpg?v=1730985957&width=768",
+        "//winklmayr.com/cdn/shop/files/QR_App_Banner2.png?v=1750232763&width=3840",
+        "//winklmayr.com/cdn/shop/files/QR_App_Banner2.png?v=1750232763&width=768"
+      ],
+      "ai_example": "To fix the missing alt attributes for images on the Winklmayr Leathercraft website, you can add descriptive alt text to the image tags. Here\u2019s a specific example:\n\n```html\n<img src=\"images/leather-bag.jpg\" alt=\"Handcrafted leather bag by Winklmayr, showcasing premium quality and design\" />\n``` \n\nThis alt text describes the image accurately and contextually for the website."
+    },
+    {
+      "type": "warning",
+      "category": "SEO",
+      "title": "Missing meta description",
+      "url": "https://winklmayr.com/collections/all",
+      "page": "/collections/all",
+      "current": "None",
+      "fix": "Add <meta name=\"description\" content=\"...\"> with 150-160 characters",
+      "ai_example": "```html\n<title>Products \u2013 Winklmayr</title>\n<meta name=\"description\" content=\"Explore our exclusive collection of premium leather bags and accessories at Winklmayr. Perfect for style and functionality.\">\n<link rel=\"canonical\" href=\"https://winklmayr.com/collections/all\" />\n```"
+    },
+    {
+      "type": "warning",
+      "category": "Accessibility",
+      "title": "Images missing alt attributes",
+      "url": "https://winklmayr.com/collections/all",
+      "page": "/collections/all",
+      "details": "1 images without alt text",
+      "examples": [
+        "//winklmayr.com/cdn/shop/files/logo_black.png?v=1714468657&width=100"
+      ],
+      "ai_example": "```html\n<img src=\"path/to/image.jpg\" alt=\"Winklmayr Luxury Leather Bag - Product Name\" />\n``` \n\nThis code snippet provides an example of how to add an alt attribute to an image on the /collections/all page, ensuring it is relevant to the product being showcased while enhancing SEO and accessibility."
+    },
+    {
+      "type": "warning",
+      "category": "SEO",
+      "title": "Missing meta description",
+      "url": "https://winklmayr.com/cart",
+      "page": "/cart",
+      "current": "None",
+      "fix": "Add <meta name=\"description\" content=\"...\"> with 150-160 characters",
+      "ai_example": "```html\n<title>Your Shopping Cart \u2013 Winklmayr</title>\n<meta name=\"description\" content=\"Review your selected items and proceed to checkout for premium leather bags and accessories at Winklmayr. Enjoy a seamless shopping experience!\">\n<link rel=\"canonical\" href=\"https://winklmayr.com/cart\" />\n```"
+    },
+    {
+      "type": "warning",
+      "category": "Accessibility",
+      "title": "Images missing alt attributes",
+      "url": "https://winklmayr.com/cart",
+      "page": "/cart",
+      "details": "1 images without alt text",
+      "examples": [
+        "//winklmayr.com/cdn/shop/files/logo_black.png?v=1714468657&width=100"
+      ]
+    },
+    {
+      "type": "warning",
+      "category": "Accessibility",
+      "title": "Images missing alt attributes",
+      "url": "https://winklmayr.com/",
+      "page": "/",
+      "details": "15 images without alt text",
+      "examples": [
+        "//winklmayr.com/cdn/shop/files/logo_black.png?v=1714468657&width=100",
+        "//winklmayr.com/cdn/shop/files/Afra-Banner_00043603-ff96-4186-ab17-74886ad969db.jpg?v=1730985957&width=3840",
+        "//winklmayr.com/cdn/shop/files/Afra-Banner_00043603-ff96-4186-ab17-74886ad969db.jpg?v=1730985957&width=768",
+        "//winklmayr.com/cdn/shop/files/QR_App_Banner2.png?v=1750232763&width=3840",
+        "//winklmayr.com/cdn/shop/files/QR_App_Banner2.png?v=1750232763&width=768"
+      ]
+    },
+    {
+      "type": "warning",
+      "category": "Accessibility",
+      "title": "Images missing alt attributes",
+      "url": "https://winklmayr.com/collections/latest",
+      "page": "/collections/latest",
+      "details": "1 images without alt text",
+      "examples": [
+        "//winklmayr.com/cdn/shop/files/logo_black.png?v=1714468657&width=100"
+      ]
+    }
+  ],
+  "broken_links": [],
+  "page_speeds": [
+    {
+      "url": "https://winklmayr.com",
+      "page": "/",
+      "loadTime": 0.0,
+      "fcp": 0.0,
+      "lcp": 0.0,
+      "cls": 0.148,
+      "fid": 0,
+      "content_size": 1476586,
+      "status_code": 200
+    },
+    {
+      "url": "https://winklmayr.com/collections/all",
+      "page": "/collections/all",
+      "loadTime": 0.0,
+      "fcp": 0.0,
+      "lcp": 0.0,
+      "cls": 0.067,
+      "fid": 0,
+      "content_size": 669861,
+      "status_code": 200
+    },
+    {
+      "url": "https://winklmayr.com/cart",
+      "page": "/cart",
+      "loadTime": 0.0,
+      "fcp": 0.0,
+      "lcp": 0.0,
+      "cls": 0.024,
+      "fid": 0,
+      "content_size": 236732,
+      "status_code": 200
+    },
+    {
+      "url": "https://winklmayr.com/",
+      "page": "/",
+      "loadTime": 0.0,
+      "fcp": 0.0,
+      "lcp": 0.0,
+      "cls": 0.148,
+      "fid": 0,
+      "content_size": 1476203,
+      "status_code": 200
+    },
+    {
+      "url": "https://winklmayr.com/collections/latest",
+      "page": "/collections/latest",
+      "loadTime": 0.0,
+      "fcp": 0.0,
+      "lcp": 0.0,
+      "cls": 0.067,
+      "fid": 0,
+      "content_size": 667204,
+      "status_code": 200
+    }
+  ]
+}
