@@ -1,11 +1,8 @@
 services:
   - type: web
     name: seo-audit-tool
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "cd web-app && python app.py"
+    env: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: OPENAI_API_KEY
         sync: false
-      - key: PYTHON_VERSION
-        value: "3.12.0"
