@@ -713,7 +713,11 @@
                             </button>
                             <div id="detail-${category}-${idx}" class="hidden border-t border-slate-800 p-4 bg-slate-900/30">
                                 ${issue.current ? `<div class="mb-3"><p class="text-xs font-semibold text-slate-400 uppercase mb-1">CURRENT:</p><div class="bg-slate-950/50 rounded p-3 border border-slate-800"><code class="text-sm text-rose-400">${escapeHtml(String(issue.current))}</code></div></div>` : ''}
-                                ${issue.fix ? `<div><p class="text-xs font-semibold text-emerald-400 uppercase mb-1">✓ HOW TO FIX:</p><div class="bg-emerald-950/20 rounded p-3 border border-emerald-900/30"><p class="text-sm text-slate-300">${escapeHtml(issue.fix)}</p></div></div>` : ''}
+                                ${issue.ai_example ? 
+                                    `<div><p class="text-xs font-semibold text-cyan-400 uppercase mb-1 flex items-center gap-2"><span>🤖 AI-GENERATED FIX</span></p><div class="bg-gradient-to-br from-cyan-950/30 to-blue-950/30 rounded p-3 border border-cyan-900/30"><pre class="text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap font-mono">${escapeHtml(issue.ai_example)}</pre></div></div>` 
+                                    : 
+                                    (issue.recommendation ? `<div><p class="text-xs font-semibold text-emerald-400 uppercase mb-1">✓ HOW TO FIX:</p><div class="bg-emerald-950/20 rounded p-3 border border-emerald-900/30"><p class="text-sm text-slate-300">${escapeHtml(issue.recommendation)}</p></div></div>` : '')
+                                }
                             </div>
                         </div>
                     `).join('')}</div>

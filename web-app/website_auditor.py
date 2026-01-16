@@ -8,6 +8,15 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
+
+from selenium import webdriver
+import undetected_chromedriver as uc
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import json
 from datetime import datetime
@@ -44,6 +53,10 @@ class WebsiteAuditor:
         }
         self.ai_enabled = ai_enabled
         self.openai_api_key = openai_api_key or os.environ.get('OPENAI_API_KEY')
+        
+        # Selenium browser
+        self.driver = None
+        self.use_selenium = True
     
     def send_progress(self, message, **kwargs):
         """Send progress update to queue if available"""
@@ -58,20 +71,79 @@ class WebsiteAuditor:
             data.update(kwargs)
             self.progress_queue.put(data)
         
-    def fetch_page(self, url):
-        """Fetch a page with proper browser headers"""
+
+    def init_browser(self):
+        """Initialize undetected Chrome browser (bypasses bot protection)"""
+        if not self.use_selenium or self.driver:
+            return
         try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Connection': 'keep-alive'
-            }
-            response = requests.get(url, headers=headers, timeout=15, allow_redirects=True, verify=False)
-            return response
+            options = uc.ChromeOptions()
+            options.add_argument('--headless=new')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+            
+            self.driver = uc.Chrome(options=options, use_subprocess=True)
+            print("✅ Undetected browser initialized (bypasses bot protection)")
         except Exception as e:
-            print(f"Error fetching {url}: {str(e)}")
+            print(f"⚠️ Browser init failed: {e}")
+            self.driver = None
+    
+    def close_browser(self):
+        """Close browser"""
+        if self.driver:
+            self.driver.quit()
+            self.driver = None
+
+    def fetch_page(self, url):
+        """Fetch page using Selenium"""
+        # Initialize browser on first call
+        if not self.driver:
+            self.init_browser()
+        
+        if not self.driver:
+            print(f"⚠️ No browser, skipping {url}")
             return None
+        
+        try:
+            self.driver.get(url)
+            
+            # Wait for body to load
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            
+            # Additional wait for JavaScript-heavy sites
+            import time
+            import random
+            
+            # Random wait to look more human
+            time.sleep(random.uniform(2, 4))
+            
+            # If we see bot challenge, wait much longer
+            if "one moment" in self.driver.page_source.lower() or "please wait" in self.driver.page_source.lower() or "checking" in self.driver.page_source.lower():
+                print(f"  ⏳ Detected bot check, waiting 15 seconds...")
+                time.sleep(15)
+                
+                # Check again if content loaded
+                if "one moment" in self.driver.page_source.lower():
+                    print(f"  ⏳ Still loading, waiting another 10 seconds...")
+                    time.sleep(10)
+            
+            # Create fake response object
+            class FakeResponse:
+                def __init__(self, driver):
+                    self.status_code = 200
+                    self.content = driver.page_source.encode('utf-8')
+                    self.text = driver.page_source
+                    self.url = driver.current_url
+                    self.history = []
+                    self.headers = {}
+            
+            return FakeResponse(self.driver)
+        except Exception as e:
+            print(f"Error: {url}: {str(e)}")
+            return None
+
     def analyze_page_speed(self, url, response):
         """Analyze page load time and resource sizes"""
         start_time = time.time()
@@ -322,8 +394,6 @@ class WebsiteAuditor:
             # Otherwise continue parsing (some servers return 4xx but with valid HTML)
         
         # Parse HTML
-        print(f"  DEBUG: Response status={response.status_code}, content_length={len(response.content)}")
-        print(f"  DEBUG: First 200 chars: {response.text[:200]}")
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Analyze page speed
@@ -345,9 +415,7 @@ class WebsiteAuditor:
         self.issues['critical'].extend(self.check_render_blocking_resources(soup, url))
         
         # Extract all links
-        all_a_tags = soup.find_all('a', href=True)
-        print(f"  DEBUG: Found {len(all_a_tags)} <a> tags on {url}")
-        
+        all_a_tags = soup.find_all('a', href=True)        
         for link in all_a_tags:
             href = link['href']
             full_url = urljoin(url, href)
@@ -661,20 +729,36 @@ Be technical, specific, and actionable. Keep response under 300 words."""
                     
                     # Only process issues that don't already have good suggestions
                     if issue.get('category') in ['SEO', 'Accessibility', 'Performance']:
-                        prompt = f"""As a web expert, provide a specific fix for this issue:
+                        # Get page context - find the page data for this issue
+                        page_title = "Unknown"
+                        page_url = issue.get('page', 'Homepage')
+                        
+                        # Try to find the actual page data
+                        for page_data in self.pages_data:
+                            if page_url in page_data.get('url', ''):
+                                page_title = page_data.get('title', 'Unknown')
+                                break
+                        
+                        prompt = f"""As a web expert, provide a specific fix for this issue.
 
-Issue: {issue.get('title')}
-Page: {issue.get('page', 'Homepage')}
-Current: {issue.get('current', 'Not set')}
+WEBSITE CONTEXT:
+- Page Title: {page_title}
+- Page URL: {page_url}
 
-Provide:
-1. One example fix (actual code/text, not instructions)
-2. Keep it under 100 words
+ISSUE:
+- Problem: {issue.get('title')}
+- Current Value: {issue.get('current', 'Not set')}
 
-Example format:
-<title>Subaru South Africa | New & Used Cars</title>
-OR
-<meta name="description" content="...specific description...">"""
+Provide ONE specific example fix using the actual website context above:
+1. Use the real page title/URL when generating meta tags
+2. Make it relevant to what this website is about
+3. Keep under 100 words
+4. Format as code (HTML tags)
+
+Example formats:
+<title>Winklmayr | Luxury Leather Bags & Accessories</title>
+<meta name="description" content="Shop premium leather bags...">
+<link rel="canonical" href="https://winklmayr.com/" />"""
 
                         response = client.chat.completions.create(
                             model="gpt-4o-mini",
@@ -745,6 +829,9 @@ OR
             'broken_links': self.broken_links,
             'page_speeds': self.page_speeds
         }
+        
+        # Cleanup browser
+        self.close_browser()
         
         return report
     

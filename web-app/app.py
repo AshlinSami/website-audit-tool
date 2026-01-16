@@ -65,6 +65,14 @@ def run_audit_stream():
                         openai_api_key=os.environ.get('OPENAI_API_KEY')
                     )
                     report = auditor.run_audit()
+                    
+                    # Save report to file
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    filename = f'audit-report-{timestamp}.json'
+                    auditor.save_report(report, filename)
+                    print(f"✅ Report saved: {filename}")
+                    
                     q.put({'type': 'complete', 'data': report})
                 except Exception as e:
                     q.put({'type': 'error', 'message': str(e)})
